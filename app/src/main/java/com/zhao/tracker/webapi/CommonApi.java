@@ -12,6 +12,7 @@ import com.zhao.tracker.model.TrackEntity;
 import com.zhao.tracker.model.Weather;
 import com.zhao.tracker.source.HttpDataSource;
 import com.zhao.tracker.util.HttpUtil;
+import com.zhao.tracker.util.StringHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class CommonApi {
      */
     public static void getTargetLocation(String key, final ResultCallback callback){
         Map<String,Object> params = new HashMap<>();
-        params.put("key", APPCONST.KEY);
+        params.put("key", key);
         HttpDataSource.httpGetNoRSA(HttpUtil.makeURLNoRSA(URLCONST.method_getTargetLocation, params), new JsonCallback() {
             @Override
             public void onFinish(JsonModel jsonModel) {
@@ -78,11 +79,29 @@ public class CommonApi {
 
     }
 
+    /**
+     * 上传位置信息
+     * @param key
+     */
+    public static void checkKey(String key,final ResultCallback callback) {
+        Map<String, Object> params = new HashMap<>();
+        if (!StringHelper.isEmpty(key)) {
+            params.put("key", key);
+        }
 
+        HttpDataSource.httpGetNoRSA(HttpUtil.makeURLNoRSA(URLCONST.method_checkKey, params), new JsonCallback() {
+            @Override
+            public void onFinish(JsonModel jsonModel) {
+                callback.onFinish(jsonModel.getResult(), jsonModel.getError());
+            }
 
+            @Override
+            public void onError(Exception e) {
+                callback.onError(e);
 
-
-
+            }
+        });
+    }
 
 
 }

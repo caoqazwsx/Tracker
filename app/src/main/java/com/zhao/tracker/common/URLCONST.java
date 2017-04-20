@@ -22,5 +22,8 @@ public class URLCONST {
     //获取目标位置
     public static final String method_getTargetLocation = nameSpace + "/mTrackController.do?getTargetLocation";
 
+    //验证Key的有效性
+    public static final String method_checkKey = nameSpace + "/mTrackController.do?checkKey";
+
 
 }

@@ -2,6 +2,7 @@ package com.zhao.tracker.application;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Handler;
 
 
 /**
@@ -11,8 +12,7 @@ import android.content.Context;
 public class MyApplication extends Application {
 
     private static Application application;
-
-
+    private static Handler handler = new Handler();
 
 
     @Override
@@ -22,11 +22,15 @@ public class MyApplication extends Application {
 
     }
 
-    public static Context getContext(){
+    public static Context getContext() {
         return application;
     }
 
     public static Application getApplication() {
         return application;
+    }
+
+    public static void runOnUiThread(Runnable runnable) {
+        handler.post(runnable);
     }
 }
