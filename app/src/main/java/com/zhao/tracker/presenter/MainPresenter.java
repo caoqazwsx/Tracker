@@ -1,7 +1,13 @@
 package com.zhao.tracker.presenter;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.provider.SyncStateContract;
 
@@ -20,6 +26,7 @@ import com.zhao.tracker.activity.MainActivity;
 import com.zhao.tracker.callback.ResultCallback;
 import com.zhao.tracker.common.APPCONST;
 import com.zhao.tracker.model.TrackEntity;
+import com.zhao.tracker.service.UpdateTargetLocationService;
 import com.zhao.tracker.util.DateHelper;
 import com.zhao.tracker.webapi.CommonApi;
 
@@ -40,6 +47,30 @@ public class MainPresenter implements BasePresenter {
 
     private Marker marker;
 
+    private UpdateTargetLocationService.UpdateTargetLocationController mUpdateTargetLocationController;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mUpdateTargetLocationController = (UpdateTargetLocationService.UpdateTargetLocationController)service;
+            mUpdateTargetLocationController.setOnTargetLocationChangeListener(new UpdateTargetLocationService.OnTargetLocationChangeListener() {
+                @Override
+                public void onLocation(TrackEntity trackEntity) {
+                    mTrackEntity = trackEntity;
+                    handler.sendMessage(handler.obtainMessage(1));
+                }
+            });
+            mUpdateTargetLocationController.start();
+            Intent it = new Intent(mMainActivity,UpdateTargetLocationService.class);
+            mMainActivity.startService(it);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mUpdateTargetLocationController.stop();
+
+        }
+    };
 
 
     private Handler handler = new Handler() {
@@ -67,6 +98,29 @@ public class MainPresenter implements BasePresenter {
     public void start() {
         init();
         getTargetLocation();
+    }
+
+   public void onDestroy() {
+
+        //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
+       mMainActivity.getMvMap().onDestroy();
+
+       mMainActivity.unbindService(serviceConnection);
+    }
+  public void onResume() {
+
+        //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
+      mMainActivity.getMvMap().onResume();
+    }
+   public void onPause() {
+
+        //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
+       mMainActivity.getMvMap().onPause();
+    }
+   public void onSaveInstanceState(Bundle outState) {
+
+        //在activity执行onSaveInstanceState时执行mMapView.onSaveInstanceState (outState)，保存地图当前的状态
+       mMainActivity.getMvMap().onSaveInstanceState(outState);
     }
 
     private void init() {
@@ -103,32 +157,9 @@ public class MainPresenter implements BasePresenter {
     }
 
     private void getTargetLocation() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    CommonApi.getTargetLocation("4028b8815b855f4e015b8589f3fc0002", new ResultCallback() {
-                        @Override
-                        public void onFinish(Object o, int code) {
-                            mTrackEntity = (TrackEntity) o;
-                            handler.sendMessage(handler.obtainMessage(1));
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-
-                        }
-                    });
-                    try {
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-        }).start();
-
+        Intent it = new Intent(mMainActivity,UpdateTargetLocationService.class);
+        mMainActivity.bindService(it,serviceConnection, Context.BIND_AUTO_CREATE);
+//        mMainActivity.startService(it);
     }
 
 

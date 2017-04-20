@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zhao.tracker">
-    <!--地图SDK（包含其搜索功能）需要的基础权限-->
+
+    <!-- 地图SDK（包含其搜索功能）需要的基础权限 -->
+
 
     <!-- 用于进行网络定位 -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -35,7 +37,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".activity.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,19 +44,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.MainActivity" />
 
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="494800e1135db4526e11f1569741cdd4" />
 
+        <service
+            android:name=".service.UpdateTargetLocationService"
+            android:enabled="true"
+            android:exported="true" />
 
-
-        <activity android:name=".activity.MainActivity">
-
-        </activity>
-
-        <meta-data android:name="com.amap.api.v2.apikey"
-            android:value="494800e1135db4526e11f1569741cdd4">
-
-        </meta-data>
-
+        <receiver
+            android:name=".receiver.AwakeUTLServiceReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>
